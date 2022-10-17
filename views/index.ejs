@@ -17,6 +17,14 @@
         <input type="file" name="file" id="file" required />
         <button style="grid-column: span 2;" type="submit">Share
         </button>
+        <% if(locals.file !=null ) {%>
+            <div style="margin: 1rem;text-align: center;">
+                your is upload at
+                <a href="<%= locals.file %> ">
+                    <%=locals.file %>
+                </a>
+            </div>
+            <% } %>
 
     </form>
 </body>

@@ -25,7 +25,7 @@ let storage = multer.diskStorage({
 
 let upload = multer({
   storage,
-  limit: { fileSize: 100000 * 100 },
+  limit: { fileSize: 100000 * 100 }, //100mb
 });
 
 //routes
@@ -48,7 +48,7 @@ async function upload_files(req, res, err) {
     size: req.file.size,
   });
   const response = await file.save();
-  return res.json({
+  return res.render("index", {
     file: `${process.env.APP_BASE_URL}/files/${response.uuid}`,
   });
 }
