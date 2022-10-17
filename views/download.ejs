@@ -7,15 +7,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+<style>
+    body {
+        background-color: rgb(7, 28, 29);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .container {
+        max-width: 500px;
+        margin: 60px auto;
+    }
+
+    .container h1 {
+        text-align: center;
+        color: white;
+    }
+
+    .box {
+        background-color: white;
+        display: block;
+        padding: 30px;
+    }
+
+    h5 {
+        margin-bottom: 15px;
+
+        margin-bottom: 10px;
+        color: white;
+    }
+
+    .submit-btn {
+        width: 30%;
+        border: none;
+        background: rgb(37, 83, 3);
+        font-size: 18px;
+        color: white;
+        border-radius: 3px;
+        padding: 20px;
+        text-align: center;
+    }
+</style>
 
 <body>
-    <h1>
-        <%= fileName %>
-    </h1>
-    <h3>
-        <a href="<%= downloadLink %>">file link</a>
 
-    </h3>
+
+    <div class="container">
+        <h1>download page
+        </h1>
+        <div id='box'>
+            <h5>
+                file name: <%= fileName %>
+            </h5>
+            <h5>
+                Download Link
+                <a href="<%= downloadLink %>"><button class="submit-btn">Download</button></a>
+            </h5>
+        </div>
+    </div>
 </body>
 
 </html>

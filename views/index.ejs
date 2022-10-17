@@ -7,26 +7,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File sharing App</title>
 </head>
+<style>
+    body {
+        background-color: rgb(7, 28, 29);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .container {
+        max-width: 500px;
+        margin: 60px auto;
+    }
+
+    .container h1 {
+        text-align: center;
+        color: white;
+    }
+
+    form {
+        background-color: white;
+        padding: 30px;
+    }
+
+    form .input-group {
+        margin-bottom: 15px;
+    }
+
+    form label {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    form input {
+        padding: 12px 20px;
+        width: 100%;
+        border: 1px solid #ccc;
+    }
+
+    .submit-btn {
+        width: 100%;
+        border: none;
+        background: rgb(37, 83, 3);
+        font-size: 18px;
+        color: white;
+        border-radius: 3px;
+        padding: 20px;
+        text-align: center;
+    }
+</style>
 
 <body>
 
-    <form action="/api/files" method="post"
-        style="display: grid; gap: .5rem; grid-template-columns: auto 1fr; max-width: 500px; margin: 0 auto;"
-        enctype="multipart/form-data">
-        <label for="file">File:</label>
-        <input type="file" name="file" id="file" required />
-        <button style="grid-column: span 2;" type="submit">Share
-        </button>
-        <% if(locals.file !=null ) {%>
-            <div style="margin: 1rem;text-align: center;">
-                your is upload at
-                <a href="<%= locals.file %> ">
-                    <%=locals.file %>
-                </a>
+    <div class="container">
+        <form id='form' action="/api/files" method="post" enctype="multipart/form-data">
+            <div class="input-group">
+                <label for="file">File:</label>
+                <input type="file" name="file" id="file" required />
             </div>
-            <% } %>
-
-    </form>
+            <div class="input-group">
+                <label for='password'>Password</label>
+                <input name='password' id='password' placeholder="Enter Password " />
+            </div>
+            <button class="submit-btn" type='submit'>Upload</button>
+            <div class="input-group">
+                <% if(locals.file !=null ) {%>
+                    <div style="margin: 1rem;text-align: center;">
+                        your is upload at
+                        <a href="<%= locals.file %> ">
+                            <%=locals.file %>
+                        </a>
+                    </div>
+                    <% } %>
+            </div>
+        </form>
+    </div>
 </body>
 
 </html>
