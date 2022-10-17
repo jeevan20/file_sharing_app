@@ -88,21 +88,3 @@ app.get("/files/download/:uuid", async (req, res) => {
 app.listen(PORT, () => {
   console.log("sever started at 3000");
 });
-
-// const express = require("express");
-// const app = express();
-// const PORT = process.env.PORT || 3000;
-// const connectDB = require("./config/db");
-// connectDB();
-
-// app.set("view engine", "ejs");
-// app.get("/", (req, res) => {
-//   res.render("index");
-// });
-
-// //Routes
-// app.use("/api/files", require("./routes/files"));
-// // app.use("/files", require("./routes/show"));
-// app.listen(PORT, () => {
-//   console.log(`Listening to port ${PORT}`);
-// });
