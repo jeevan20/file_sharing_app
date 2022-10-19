@@ -7,6 +7,7 @@ const multer = require("multer");
 const path = require("path"); //To get the file extension
 const File = require("./models/file"); // to get database model
 const { v4: uuid4 } = require("uuid");
+const bcrypt = require("bcrypt");
 
 connectDB();
 
@@ -37,16 +38,24 @@ app.get("/", (req, res) => {
 app.post("/api/files", upload.single("file"), upload_files);
 
 async function upload_files(req, res, err) {
+  console.log(req.body);
+  console.log(req.file);
   //validate request
   if (!req.file) {
     return res.json({ error: "All fields are required" });
   }
   const file = new File({
     filename: req.file.filename,
+    originalname: req.file.originalname,
     uuid: uuid4(),
     path: req.file.path,
     size: req.file.size,
   });
+  console.log("1" + req.body.password);
+  if (req.body.password != null && req.body.password !== "") {
+    file.password = req.body.password;
+    console.log(req.body.password);
+  }
   const response = await file.save();
   return res.render("index", {
     file: `${process.env.APP_BASE_URL}/files/${response.uuid}`,
@@ -60,6 +69,8 @@ app.get("/files/:uuid", async (req, res) => {
     const file = await File.findOne({ uuid: req.params.uuid });
     if (!file) {
       return res.render("download", { error: "link expired" });
+    }
+    if (file.password != null) {
     }
     return res.render("download", {
       uuid: file.uuid,
