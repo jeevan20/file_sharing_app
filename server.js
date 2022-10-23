@@ -3,19 +3,14 @@ const multer = require("multer");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const File = require("./models/File");
-
+const connectDB = require("./config/db");
 const express = require("express");
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 
 const upload = multer({ dest: "uploads" });
 
-mongoose.connect(process.env.DATABASE_URL, {
-  useNewUrlParser: true,
-  // useCreateIndex: true,
-  useUnifiedTopology: true,
-  // useFindAndModify: true,
-});
+connectDB();
 
 app.set("view engine", "ejs");
 
@@ -24,7 +19,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/files", upload.single("file"), async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   // console.log(req.file);
   const fileData = {
     path: req.file.path,
@@ -46,7 +41,7 @@ app.route("/file/:id").get(handleDownload).post(handleDownload);
 
 async function handleDownload(req, res) {
   const file = await File.findById(req.params.id);
-  console.log(file);
+  // console.log(file);
   if (file.password != null) {
     if (req.body.password == null) {
       res.render("password");
