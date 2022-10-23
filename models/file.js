@@ -1,18 +1,21 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
 
-const fileSchema = new Schema(
-  {
-    filename: { type: String, required: true },
-    originalname: { type: String, required: true },
-    path: { type: String, required: true },
-    size: { type: Number, required: true },
-    uuid: { type: String, required: true },
-    sender: { type: String, required: false },
-    receiver: { type: String, required: false },
-    password: { type: String, required: false },
+const File = new mongoose.Schema({
+  path: {
+    type: String,
+    required: true,
   },
-  { timestamps: true }
-);
+  originalName: {
+    type: String,
+    required: true,
+  },
+  password: String,
+  size: { type: Number, required: true },
+  downloadCount: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+});
 
-module.exports = mongoose.model("File", fileSchema);
+module.exports = mongoose.model("File", File);

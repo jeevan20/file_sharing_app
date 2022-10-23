@@ -1,87 +1,77 @@
+require("dotenv").config();
+const multer = require("multer");
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const File = require("./models/File");
+
 const express = require("express");
 const app = express();
-const PORT = process.env.PORT || 3000;
-const connectDB = require("./config/db"); // connection to mongodb atlas
-const ejs = require("ejs");
-const multer = require("multer");
-const path = require("path"); //To get the file extension
-const File = require("./models/file"); // to get database model
-const { v4: uuid4 } = require("uuid");
-const bcrypt = require("bcrypt");
+app.use(express.urlencoded({ extended: true }));
 
-connectDB();
+const upload = multer({ dest: "uploads" });
+
+mongoose.connect(process.env.DATABASE_URL, {
+  useNewUrlParser: true,
+  // useCreateIndex: true,
+  useUnifiedTopology: true,
+  // useFindAndModify: true,
+});
 
 app.set("view engine", "ejs");
 
-// multer file settings
-let storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => {
-    const uniquename = `${Date.now()}=${Math.round(
-      Math.random() * 1e9
-    )}${path.extname(file.originalname)}`;
-    cb(null, uniquename);
-  },
-});
-
-let upload = multer({
-  storage,
-  limit: { fileSize: 100000 * 100 }, //100mb
-});
-
-//routes
 app.get("/", (req, res) => {
   res.render("index");
 });
 
-// uploading files to database
-app.post("/api/files", upload.single("file"), upload_files);
-
-async function upload_files(req, res, err) {
+app.post("/api/files", upload.single("file"), async (req, res) => {
   console.log(req.body);
-  console.log(req.file);
-  //validate request
-  if (!req.file) {
-    return res.json({ error: "All fields are required" });
-  }
-  const file = new File({
-    filename: req.file.filename,
-    originalname: req.file.originalname,
-    uuid: uuid4(),
+  // console.log(req.file);
+  const fileData = {
     path: req.file.path,
+    originalName: req.file.originalname,
     size: req.file.size,
-  });
-  console.log("1" + req.body.password);
+  };
   if (req.body.password != null && req.body.password !== "") {
-    file.password = req.body.password;
-    console.log(req.body.password);
+    fileData.password = await bcrypt.hash(req.body.password, 10);
   }
-  const response = await file.save();
-  return res.render("index", {
-    file: `${process.env.APP_BASE_URL}/files/${response.uuid}`,
+
+  const file = await File.create(fileData);
+
+  res.render("index", {
+    fileLink: `${process.env.APP_BASE_URL}/file/${file.id}`,
   });
-}
+});
 
-//download page
+app.route("/file/:id").get(handleDownload).post(handleDownload);
 
-app.get("/files/:uuid", async (req, res) => {
-  try {
-    const file = await File.findOne({ uuid: req.params.uuid });
-    if (!file) {
-      return res.render("download", { error: "link expired" });
+async function handleDownload(req, res) {
+  const file = await File.findById(req.params.id);
+  console.log(file);
+  if (file.password != null) {
+    if (req.body.password == null) {
+      res.render("password");
+      return;
     }
-    if (file.password != null) {
+
+    if (!(await bcrypt.compare(req.body.password, file.password))) {
+      res.render("password", { error: true });
+      return;
     }
+    if (await bcrypt.compare(req.body.password, file.password)) {
+      return res.render("download", {
+        fileName: file.originalName,
+        fileSize: file.size,
+        downloadLink: `${process.env.APP_BASE_URL}/files/download/${file.uuid}`,
+      });
+    }
+  } else {
     return res.render("download", {
-      uuid: file.uuid,
-      fileName: file.filename,
+      fileName: file.originalName,
       fileSize: file.size,
       downloadLink: `${process.env.APP_BASE_URL}/files/download/${file.uuid}`,
     });
-  } catch (err) {
-    return res.render("download", { error: "something went wrong" });
   }
-});
+}
 
 //download link
 app.get("/files/download/:uuid", async (req, res) => {
@@ -96,6 +86,6 @@ app.get("/files/download/:uuid", async (req, res) => {
   res.download(filePath);
 });
 
-app.listen(PORT, () => {
-  console.log("sever started at 3000");
+app.listen(process.env.PORT, () => {
+  console.log("server started at 3000");
 });

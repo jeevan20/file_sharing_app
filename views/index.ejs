@@ -2,106 +2,106 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File sharing App</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Sharing App</title>
 </head>
 <style>
-    :root {
-        --main-bg-color: #edf5fe;
-        --light-blue: #03a9f4;
-        --dark-blue: #028bca;
-    }
+  :root {
+    --main-bg-color: #edf5fe;
+    --light-blue: #03a9f4;
+    --dark-blue: #028bca;
+  }
 
-    body {
-        font-family: system-ui;
-        background: var(--main-bg-color);
-        height: 98vh;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #333;
-    }
+  body {
+    font-family: system-ui;
+    background: var(--main-bg-color);
+    height: 98vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+  }
 
-    * {
-        box-sizing: border-box;
-    }
+  * {
+    box-sizing: border-box;
+  }
 
-    .container {
-        background: #fff;
-        width: 430px;
-        max-width: 90%;
-        border-radius: 25px;
-        box-shadow: 0px 20px 20px 0px #00000017;
-        padding: 2rem;
-        text-align: center;
-    }
+  .container {
+    background: #fff;
+    width: 430px;
+    max-width: 90%;
+    border-radius: 25px;
+    box-shadow: 0px 20px 20px 0px #00000017;
+    padding: 2rem;
+    text-align: center;
+  }
 
-    .container h1 {
-        text-align: center;
-        color: white;
-    }
+  .container h1 {
+    text-align: center;
+    color: white;
+  }
 
-    form {
-        background-color: white;
-        padding: 30px;
-    }
+  form {
+    background-color: white;
+    padding: 30px;
+  }
 
-    form .input-group {
-        margin-bottom: 15px;
-    }
+  form .input-group {
+    margin-bottom: 15px;
+  }
 
-    form label {
-        display: block;
-        margin-bottom: 10px;
-    }
+  form label {
+    display: block;
+    margin-bottom: 10px;
+  }
 
-    form input {
-        padding: 12px 20px;
-        width: 100%;
-        border: 1px solid #ccc;
-    }
+  form input {
+    padding: 12px 20px;
+    width: 100%;
+    border: 1px solid #ccc;
+  }
 
-    .submit-btn {
-        padding: 8px 40px;
-        width: 100%;
-        border: none;
-        background: var(--light-blue);
-        font-size: 18px;
-        color: white;
-        border-radius: 3px;
-        padding: 20px;
-        text-align: center;
-    }
+  .submit-btn {
+    padding: 8px 40px;
+    width: 100%;
+    border: none;
+    background: var(--light-blue);
+    font-size: 18px;
+    color: white;
+    border-radius: 3px;
+    padding: 20px;
+    text-align: center;
+  }
 </style>
 
 <body>
+  <div class="container">
+    <form action="/api/files" method="post" enctype="multipart/form-data">
+      <div class="input-group">
+        <label for="file">File:</label>
+        <input type="file" id="file" name="file" required />
+      </div>
+      <div class="input-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" placeholder="Enter Password " />
+      </div>
+      <button class="submit-btn" type="submit">Share</button>
 
-    <div class="container">
-        <form id='form' action="/api/files" method="post" enctype="multipart/form-data">
-            <div class="input-group">
-                <label for="file">File:</label>
-                <input type="file" name="file" id="file" required />
-            </div>
-            <div class="input-group">
-                <label for='password'>Password:</label>
-                <input type="password" id='password' placeholder="Enter Password " />
-            </div>
-            <button class="submit-btn" type='submit'>Upload</button>
-            <div class="input-group">
-                <% if(locals.file !=null ) {%>
-                    <div style="margin: 1rem;text-align: center;">
-                        your is upload at
-                        <a href="<%= locals.file %> ">
-                            <%=locals.file %>
-                        </a>
-                    </div>
-                    <% } %>
-            </div>
-        </form>
-    </div>
+      <div class="input-group">
+        <% if (locals.fileLink !=null) { %>
+          <div style="margin-bottom: 1rem;text-align: center;">
+            Your file is upload
+            <a href="<%= locals.fileLink %>">
+              <%=locals.fileLink %>
+            </a>
+          </div>
+          <% } %>
+      </div>
+    </form>
+  </div>
 </body>
 
 </html>
