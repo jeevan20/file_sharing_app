@@ -5,10 +5,23 @@ const bcrypt = require("bcrypt");
 const File = require("./models/File");
 const connectDB = require("./config/db");
 const express = require("express");
+const path = require("path");
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 
-const upload = multer({ dest: "uploads" });
+let storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${Math.round(
+      Math.random() * 1e9
+    )}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  },
+});
+
+let upload = multer({ storage, limits: { fileSize: 1000000 * 100 } }); //100mb
+
+// const upload = multer({ dest: "uploads" });
 
 connectDB();
 
