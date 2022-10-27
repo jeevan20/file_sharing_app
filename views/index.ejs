@@ -208,7 +208,7 @@
     const whatsappBtn = document.querySelector(".whatsapp-btn");
 
     function socialbtn() {
-      let postUrl = encodeURI(document.location.href);
+      let postUrl = encodeURI("<%= locals.fileLink %> ");
       let postTitle = encodeURI("Hi, please check this out :");
       facebookBtn.setAttribute(
         "href",
