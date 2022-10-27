@@ -6,8 +6,19 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>File Sharing App</title>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script src="https://kit.fontawesome.com/b0c1005591.js" crossorigin="anonymous"></script>
 </head>
 <style>
+  .material-symbols-outlined {
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 48
+  }
+
   :root {
     --main-bg-color: #edf5fe;
     --light-blue: #03a9f4;
@@ -75,6 +86,75 @@
     padding: 20px;
     text-align: center;
   }
+
+  .downloadPage {
+    --height: 36px;
+    margin-top: 1rem;
+    display: flex;
+    width: 100%;
+  }
+
+  .downloadPage-input {
+    flex-grow: 1;
+    padding: 0 8px;
+    font-size: 14px;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    border-right: none;
+    outline: none;
+  }
+
+  .downloadPage-input:hover {
+    background: #eeeeee;
+  }
+
+  .downloadPage-button {
+    flex-shrink: 0;
+    width: var(--height);
+    height: var(--height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--light-blue);
+    color: white;
+    outline: none;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .downloadPage-button:hover {
+    background: var(--dark-blue);
+    ;
+  }
+
+  /* Share Buttons */
+
+  .share-btn-container {
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .share-btn-container a i {
+    margin-top: 1rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    font-size: 32px;
+  }
+
+  .share-btn-container .fa-facebook {
+    color: #3b5998;
+  }
+
+  .share-btn-container .fa-twitter {
+    color: #1da1f2;
+  }
+
+  .share-btn-container .fa-whatsapp {
+    color: #25d366;
+  }
 </style>
 
 <body>
@@ -90,18 +170,65 @@
       </div>
       <button class="submit-btn" type="submit">Share</button>
 
-      <div class="input-group">
+      <div class="url-group">
         <% if (locals.fileLink !=null) { %>
-          <div style="margin-bottom: 1rem;text-align: center;">
-            Your file is upload
-            <a href="<%= locals.fileLink %>">
-              <%=locals.fileLink %>
+          <div class="downloadPage">
+            <input class="downloadPage-input" type="text" name="text" id="text" value="<%= locals.fileLink %> ">
+            <span onclick="copy()" class="material-symbols-outlined downloadPage-button">
+              content_copy
+            </span>
+          </div>
+          <!-- Your file is upload
+          <a href="<%= locals.fileLink %>">
+            <%=locals.fileLink %>
+          </a> -->
+          <div class="share-btn-container">
+            <a href="#" class="whatsapp-btn">
+              <i class="fa-brands fa-whatsapp"></i>
+            </a>
+            <a href="#" class="facebook-btn">
+              <i class="fa-brands fa-facebook"></i>
+            </a>
+            <a href="#" class="twitter-btn">
+              <i class="fa-brands fa-twitter"></i>
             </a>
           </div>
           <% } %>
       </div>
     </form>
   </div>
+  <script>
+    function copy() {
+      var input = document.getElementById('text');
+      input.select();
+      document.execCommand("copy");
+    }
+    const facebookBtn = document.querySelector(".facebook-btn");
+    const twitterBtn = document.querySelector(".twitter-btn");
+    const whatsappBtn = document.querySelector(".whatsapp-btn");
+
+    function socialbtn() {
+      let postUrl = encodeURI(document.location.href);
+      let postTitle = encodeURI("Hi, please check this out :");
+      facebookBtn.setAttribute(
+        "href",
+        `https://www.facebook.com/sharer.php?u=${postUrl}`
+      );
+
+      twitterBtn.setAttribute(
+        "href",
+        `https://twitter.com/share?url=${postUrl}&text=${postTitle}`
+      );
+
+      whatsappBtn.setAttribute(
+        "href",
+        `https://wa.me/?text=${postTitle} ${postUrl}`
+      );
+    }
+
+    socialbtn();
+
+  </script>
 </body>
 
 </html>
