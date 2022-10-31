@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- Tocheck -->
 
 <head>
   <meta charset="UTF-8">
@@ -155,6 +156,10 @@
   .share-btn-container .fa-whatsapp {
     color: #25d366;
   }
+
+  .qr-code img {
+    padding: 2rem;
+  }
 </style>
 
 <body>
@@ -182,6 +187,11 @@
           <a href="<%= locals.fileLink %>">
             <%=locals.fileLink %>
           </a> -->
+          <div class="wrapper">
+            <div class="qr-code">
+              <img src=" " alt="qr-code">
+            </div>
+          </div>
           <div class="share-btn-container">
             <a href="#" class="whatsapp-btn">
               <i class="fa-brands fa-whatsapp"></i>
@@ -193,11 +203,18 @@
               <i class="fa-brands fa-twitter"></i>
             </a>
           </div>
+
           <% } %>
       </div>
     </form>
   </div>
   <script>
+
+    qrinput = "<%= locals.fileLink %>"
+    qrimg = document.querySelector(".wrapper .qr-code img")
+    qrimg.src = `https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${qrinput}`;
+    console.log(qrinput);
+
     function copy() {
       var input = document.getElementById('text');
       input.select();
@@ -208,7 +225,7 @@
     const whatsappBtn = document.querySelector(".whatsapp-btn");
 
     function socialbtn() {
-      let postUrl = encodeURI("<%= locals.fileLink %> ");
+      let postUrl = encodeURI(document.location.href);
       let postTitle = encodeURI("Hi, please check this out :");
       facebookBtn.setAttribute(
         "href",

@@ -19,7 +19,7 @@ let storage = multer.diskStorage({
   },
 });
 
-let upload = multer({ storage, limits: { fileSize: 1000000 * 100 } }); //100mb
+let upload = multer({ storage, limits: { fileSize: 10000000 * 100 } }); //1000mb
 
 // const upload = multer({ dest: "uploads" });
 
