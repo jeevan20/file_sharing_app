@@ -8,7 +8,8 @@ const connectDB = require("./config/db");
 const express = require("express");
 const path = require("path");
 const app = express();
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 let storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
@@ -94,8 +95,35 @@ app.get("/files/download/:uuid", async (req, res) => {
   const filePath = `${__dirname}/file_sharing_app/../${file.path}`;
   res.download(filePath);
 });
+
+
+
 app.get("/register",(req,res)=>{
   res.render("register")
+})
+
+app.post("/register",async(req,res)=>{
+  try {
+  const password=req.body.password;
+  const cpassword = req.body.confirmpassword; 
+  if(password=== cpassword){
+    const newuser = new register({
+      name:req.body.name,
+      email:req.body.email,
+      age:req.body.age,
+      contact:req.body.contact,
+      password:password,
+      confirmpassword:cpassword
+
+    })
+    const user = await newuser.save();
+    res.status(201).render("index");
+  }else{
+    res.send("passwords are not matching")
+  }
+  } catch (error) {
+    res.status(400).send(error)
+  }
 })
 
 app.get("/login" ,(req,res)=>{
@@ -105,7 +133,12 @@ app.post("/login",async(req,res)=>{
     try {
       const email = req.body.email;
       const password = req.body.password;
-      
+    const userinfo=  await register.findOne({email:email})
+      if(userinfo.password===password){
+      res.render("index")
+    }else{
+      res.send("passwords are not matching");
+    }
     } catch (error) {
       res.status(400).send("Invalid email")
     }

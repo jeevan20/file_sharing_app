@@ -109,7 +109,11 @@ h1{
 <body>
     <div class="center">
         <h1>Register</h1>
-        <form action="/login" method="post">
+        <form action="/register" method="post">
+            <div class="txt-field">
+                <input type="text" name="name" required>
+                <label for="">Name</label>
+            </div>
             <div class="txt-field">
                 <input type="email" name="email" required>
                 <label for="">Email</label>
@@ -130,9 +134,9 @@ h1{
                 <input type="password" name="confirmpassword" required>
                 <label for="">Confirm Password</label>
             </div>
-            <input type="submit" value="Login">
+            <input type="submit" value="Register">
             <div class="sign-up">
-                Not a member? <a href="#">Signup</a>
+                Already a member? <a href="/views/login.ejs">Login</a>
             </div>
         </form>
     </div>

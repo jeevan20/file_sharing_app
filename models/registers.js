@@ -1,27 +1,22 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 const regschema = new mongoose.Schema(
     {
-      firstname:{
+      name:{
         type:String,
         required:true
       },
       email:{
         type:String,
         required:true,
-        unique:true
       },
-      gender:{
+      age:{
         type:String,
         required:true
       },
-      phone:{
+      contact:{
         type:Number,
         required:true,
-        unique:true
-      },
-      age:{
-        type:Number,
-        required:true
       },
      password:{
       type:String,
@@ -31,6 +26,15 @@ const regschema = new mongoose.Schema(
       type:String,
       required:true
     }
+  })
+
+  regschema.pre("save",async function(next){
+    if(this.isModified("password")){
+    this.password = await bcrypt.hash(this.password,10);
+    this.confirmpassword = await bcrypt.hash(this.confirmpassword,10);
+    
+    }
+    next();
   })
   module.exports = mongoose.model("register",regschema);
   

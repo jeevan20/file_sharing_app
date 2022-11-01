@@ -158,10 +158,44 @@
   .qr-code img{
     padding: 2rem;
   }
+  nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 40px;
+    padding-left: 10%;
+    padding-right: 10%;
+  }
+  .logo{
+    color: white;
+    font-size: 28px;
+  }
+  nav ul li{
+    list-style-type: none;
+    display: inline-block;
+    padding: 10px 20px;
+  }
+  nav ul li a{
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  nav ul li a:hover{
+    color:black ;
+    transition: .3s;
+  }
 </style>
 
 <body>
   <div class="container">
+    <!-- <nav>
+      <h2 class="logo">ShareMe</h2>
+      <ul>
+        <li><a href="/views/register">Register</a></li>
+        <li><a href="/views/login">Login</a></li>
+      </ul>
+    </nav> -->
+
     
     <form action="/api/files" method="post" enctype="multipart/form-data">
       <div class="input-group">
