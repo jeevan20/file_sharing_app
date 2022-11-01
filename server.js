@@ -2,6 +2,7 @@ require("dotenv").config();
 const multer = require("multer");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const register = require("./models/registers")
 const File = require("./models/File");
 const connectDB = require("./config/db");
 const express = require("express");
@@ -93,6 +94,23 @@ app.get("/files/download/:uuid", async (req, res) => {
   const filePath = `${__dirname}/file_sharing_app/../${file.path}`;
   res.download(filePath);
 });
+app.get("/register",(req,res)=>{
+  res.render("register")
+})
+
+app.get("/login" ,(req,res)=>{
+  res.render("login")
+})
+app.post("/login",async(req,res)=>{
+    try {
+      const email = req.body.email;
+      const password = req.body.password;
+      
+    } catch (error) {
+      res.status(400).send("Invalid email")
+    }
+})
+
 
 app.listen(process.env.PORT, () => {
   console.log("server started at 3000");
