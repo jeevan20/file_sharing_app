@@ -62,7 +62,7 @@ app.post("/api/files", upload.array("file"), async (req, res) => {
       zipFile.on("error", (error) => {
         console.error("error occurred :", error);
       });
-      const randomPath = Math.random();
+      const randomPath = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
       const writeStream = fs.createWriteStream(`uploads/${randomPath}`);
       zipFile.pipe(writeStream);
       let sizeoffiles = 0;
