@@ -7,6 +7,8 @@ const connectDB = require("./config/db");
 const express = require("express");
 const path = require("path");
 const app = express();
+const archiver = require("archiver"); // for multiple file uploads
+const fs = require("fs");
 app.use(express.urlencoded({ extended: true }));
 
 let storage = multer.diskStorage({
@@ -31,23 +33,70 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
-app.post("/api/files", upload.single("file"), async (req, res) => {
-  // console.log(req.body);
-  // console.log(req.file);
-  const fileData = {
-    path: req.file.path,
-    originalName: req.file.originalname,
-    size: req.file.size,
-  };
-  if (req.body.password != null && req.body.password !== "") {
-    fileData.password = await bcrypt.hash(req.body.password, 10);
+app.post("/api/files", upload.array("file"), async (req, res) => {
+  const { files } = req;
+  const { title } = req.body;
+  try {
+    if (files.length === 1) {
+      const fileData = {
+        path: files[0].path,
+        originalName: files[0].originalname,
+        size: files[0].size,
+      };
+      if (req.body.password != null && req.body.password !== "") {
+        fileData.password = await bcrypt.hash(req.body.password, 10);
+      }
+
+      const file = await File.create(fileData);
+
+      res.render("index", {
+        fileLink: `${process.env.APP_BASE_URL}/file/${file.id}`,
+      });
+    } else if (files.length > 1) {
+      const zipFile = archiver("zip", { zlib: { level: 9 } });
+
+      zipFile.on("warning", (error) => {
+        console.log("warning:", error);
+      });
+
+      zipFile.on("error", (error) => {
+        console.error("error occurred :", error);
+      });
+      const randomPath = Math.random();
+      const writeStream = fs.createWriteStream(`uploads/${randomPath}`);
+      zipFile.pipe(writeStream);
+      let sizeoffiles = 0;
+      await files.forEach((file) => {
+        sizeoffiles += file.size;
+        zipFile.append(fs.createReadStream(file.path), {
+          name: file.originalname,
+        });
+      });
+      await zipFile.finalize();
+
+      files.forEach((file) => {
+        fs.unlink(file.path, (err) => {
+          if (err) console.log(err);
+        });
+      });
+
+      const fileData = {
+        path: `uploads/${randomPath}`,
+        originalName: `${title}.zip`,
+        size: sizeoffiles,
+      };
+      if (req.body.password != null && req.body.password !== "") {
+        fileData.password = await bcrypt.hash(req.body.password, 10);
+      }
+      const file = await File.create(fileData);
+      res.render("index", {
+        fileLink: `${process.env.APP_BASE_URL}/file/${file.id}`,
+      });
+    }
+  } catch (error) {
+    // next();
+    console.log(error);
   }
-
-  const file = await File.create(fileData);
-
-  res.render("index", {
-    fileLink: `${process.env.APP_BASE_URL}/file/${file.id}`,
-  });
 });
 
 app.route("/file/:id").get(handleDownload).post(handleDownload);
