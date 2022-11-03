@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <!-- Tocheck -->
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -155,57 +156,28 @@
   .share-btn-container .fa-whatsapp {
     color: #25d366;
   }
-  .qr-code img{
+
+  .qr-code img {
     padding: 2rem;
-  }
-  nav{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 40px;
-    padding-left: 10%;
-    padding-right: 10%;
-  }
-  .logo{
-    color: white;
-    font-size: 28px;
-  }
-  nav ul li{
-    list-style-type: none;
-    display: inline-block;
-    padding: 10px 20px;
-  }
-  nav ul li a{
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-  }
-  nav ul li a:hover{
-    color:black ;
-    transition: .3s;
   }
 </style>
 
 <body>
   <div class="container">
-    <!-- <nav>
-      <h2 class="logo">ShareMe</h2>
-      <ul>
-        <li><a href="/views/register">Register</a></li>
-        <li><a href="/views/login">Login</a></li>
-      </ul>
-    </nav> -->
-
-    
     <form action="/api/files" method="post" enctype="multipart/form-data">
       <div class="input-group">
         <label for="file">File:</label>
-        <input type="file" id="file" name="file" required />
+        <input type="file" id="file" name="file" required multiple />
       </div>
       <div class="input-group">
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" placeholder="Enter Password " />
       </div>
+      <div class="mail">
+        <input type="email" name ="sendermail" placeholder="SenderMail Address"/>
+        <input type="email" name="recievermail" placeholder="RecieverMail Address"/> 
+      </div>
+      <br/>
       <button class="submit-btn" type="submit">Share</button>
 
       <div class="url-group">
@@ -220,9 +192,10 @@
           <a href="<%= locals.fileLink %>">
             <%=locals.fileLink %>
           </a> -->
+          
           <div class="wrapper">
             <div class="qr-code">
-              <img src=" "alt="qr-code">
+              <img src=" " alt="qr-code">
             </div>
           </div>
           <div class="share-btn-container">
@@ -236,18 +209,18 @@
               <i class="fa-brands fa-twitter"></i>
             </a>
           </div>
-          
+
           <% } %>
       </div>
     </form>
   </div>
   <script>
 
-    qrinput ="<%= locals.fileLink %>"
+    qrinput = "<%= locals.fileLink %>"
     qrimg = document.querySelector(".wrapper .qr-code img")
-      qrimg.src=`https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${qrinput}`;
-      console.log(qrinput);
-    
+    qrimg.src = `https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${qrinput}`;
+    console.log(qrinput);
+
     function copy() {
       var input = document.getElementById('text');
       input.select();

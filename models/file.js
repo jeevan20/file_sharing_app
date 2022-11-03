@@ -16,8 +16,14 @@ const File = new mongoose.Schema({
     required: true,
     default: 0,
   },
+  sender:{
+    type:String,
+    required:false,
+  },
+  reciever:{
+    type:String,
+    required:false,
+  }
 });
-
-
 
 module.exports = mongoose.model("File", File);

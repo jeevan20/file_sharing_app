@@ -2,14 +2,14 @@ require("dotenv").config();
 const multer = require("multer");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const register = require("./models/registers")
 const File = require("./models/File");
 const connectDB = require("./config/db");
 const express = require("express");
 const path = require("path");
 const app = express();
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+const archiver = require("archiver"); // for multiple file uploads
+const fs = require("fs");
+app.use(express.urlencoded({ extended: true }));
 
 let storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
@@ -21,7 +21,7 @@ let storage = multer.diskStorage({
   },
 });
 
-let upload = multer({ storage, limits: { fileSize: 1000000 * 100 } }); //100mb
+let upload = multer({ storage, limits: { fileSize: 10000000 * 100 } }); //1000mb
 
 // const upload = multer({ dest: "uploads" });
 
@@ -33,23 +33,101 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
-app.post("/api/files", upload.single("file"), async (req, res) => {
-  // console.log(req.body);
-  // console.log(req.file);
-  const fileData = {
-    path: req.file.path,
-    originalName: req.file.originalname,
-    size: req.file.size,
-  };
-  if (req.body.password != null && req.body.password !== "") {
-    fileData.password = await bcrypt.hash(req.body.password, 10);
+app.post("/api/files", upload.array("file"), async (req, res) => {
+  const { files } = req;
+ 
+  let id ="";
+  try {
+    if (files.length === 1) {
+      const fileData = {
+        path: files[0].path,
+        originalName: files[0].originalname,
+        size: files[0].size,
+      };
+      if (req.body.password != null && req.body.password !== "") {
+        fileData.password = await bcrypt.hash(req.body.password, 10);
+      }
+
+      const file = await File.create(fileData);
+      id=file.id;
+      res.render("index", {
+        fileLink: `${process.env.APP_BASE_URL}/file/${file.id}`,
+      });
+    } else if (files.length > 1) {
+      const zipFile = archiver("zip", { zlib: { level: 9 } });
+
+      zipFile.on("warning", (error) => {
+        console.log("warning:", error);
+      });
+
+      zipFile.on("error", (error) => {
+        console.error("error occurred :", error);
+      });
+      const randomPath =`${Date.now()}-${Math.round( Math.random() * 1e9)}`;
+      const writeStream = fs.createWriteStream(`uploads/${randomPath}`);
+      zipFile.pipe(writeStream);
+      let sizeoffiles = 0;
+      await files.forEach((file) => {
+        sizeoffiles += file.size;
+        zipFile.append(fs.createReadStream(file.path), {
+          name: file.originalname,
+        });
+      });
+      await zipFile.finalize();
+
+      files.forEach((file) => {
+        fs.unlink(file.path, (err) => {
+          if (err) console.log(err);
+        });
+      });
+      const title = files[0].originalname;
+
+      const fileData = {
+        path: `uploads/${randomPath}`,
+        originalName: `${title}.zip`,
+        size: sizeoffiles,
+      };
+      if (req.body.password != null && req.body.password !== "") {
+        fileData.password = await bcrypt.hash(req.body.password, 10);
+      }
+      const file = await File.create(fileData);
+      id=file.id;
+      res.render("index", {
+        fileLink: `${process.env.APP_BASE_URL}/file/${file.id}`,
+      });
+    }
+    let emailFrom=req.body.sendermail;
+    let emailTo=req.body.recievermail;
+    console.log(emailFrom);
+    console.log(emailTo);
+    if(!id || !emailTo || !emailFrom)
+    console.log("All fields are required");
+
+  const file = await File.findOne({_id:id});
+
+  if(file.sender){
+    console.log("Already sent");
   }
 
-  const file = await File.create(fileData);
+  const sendmail = require("./mail");
+  sendmail({
+    from:emailFrom,
+    to:emailTo,
+    subject:"file sharing",
+    text:`${emailFrom} sent a mail`,
+    html:require("./template")({
+      emailFrom:emailFrom,
+      downloadlink:`${process.env.APP_BASE_URL}/files/${file.uuid}`,
+      size:parseInt(file.size/1000)+'KB',
+      expires:'24 hours'
 
-  res.render("index", {
-    fileLink: `${process.env.APP_BASE_URL}/file/${file.id}`,
+    })
   });
+  } catch (error) {
+    // next();
+    console.log(error);
+  }
+
 });
 
 app.route("/file/:id").get(handleDownload).post(handleDownload);
@@ -95,54 +173,6 @@ app.get("/files/download/:uuid", async (req, res) => {
   const filePath = `${__dirname}/file_sharing_app/../${file.path}`;
   res.download(filePath);
 });
-
-
-
-app.get("/register",(req,res)=>{
-  res.render("register")
-})
-
-app.post("/register",async(req,res)=>{
-  try {
-  const password=req.body.password;
-  const cpassword = req.body.confirmpassword; 
-  if(password=== cpassword){
-    const newuser = new register({
-      name:req.body.name,
-      email:req.body.email,
-      age:req.body.age,
-      contact:req.body.contact,
-      password:password,
-      confirmpassword:cpassword
-
-    })
-    const user = await newuser.save();
-    res.status(201).render("index");
-  }else{
-    res.send("passwords are not matching")
-  }
-  } catch (error) {
-    res.status(400).send(error)
-  }
-})
-
-app.get("/login" ,(req,res)=>{
-  res.render("login")
-})
-app.post("/login",async(req,res)=>{
-    try {
-      const email = req.body.email;
-      const password = req.body.password;
-    const userinfo=  await register.findOne({email:email})
-      if(userinfo.password===password){
-      res.render("index")
-    }else{
-      res.send("passwords are not matching");
-    }
-    } catch (error) {
-      res.status(400).send("Invalid email")
-    }
-})
 
 
 app.listen(process.env.PORT, () => {
