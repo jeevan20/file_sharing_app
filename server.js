@@ -9,8 +9,12 @@ const path = require("path");
 const app = express();
 const archiver = require("archiver"); // for multiple file uploads
 const fs = require("fs");
-app.use(express.urlencoded({ extended: true }));
+//install body-parser npm and require it
+const bodyParser = require("body-parser");
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use("/public", express.static(path.join(__dirname, "./public")));
 let storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => {
@@ -20,7 +24,7 @@ let storage = multer.diskStorage({
     cb(null, uniqueName);
   },
 });
-
+// app.use(express.bodyParser());
 let upload = multer({ storage, limits: { fileSize: 10000000 * 100 } }); //1000mb
 
 // const upload = multer({ dest: "uploads" });
@@ -33,9 +37,13 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
+app.post("/transfer", (req, res) => {
+  res.render("index");
+});
+
 app.post("/api/files", upload.array("file"), async (req, res) => {
   const { files } = req;
-  const { title } = req.body;
+  let id = "";
   try {
     if (files.length === 1) {
       const fileData = {
@@ -46,10 +54,12 @@ app.post("/api/files", upload.array("file"), async (req, res) => {
       if (req.body.password != null && req.body.password !== "") {
         fileData.password = await bcrypt.hash(req.body.password, 10);
       }
+      fileData.sender = req.body.sendermail;
+      fileData.receiver = req.body.recievermail;
 
       const file = await File.create(fileData);
-
-      res.render("index", {
+      id = file.id;
+      res.render("transfer", {
         fileLink: `${process.env.APP_BASE_URL}/file/${file.id}`,
       });
     } else if (files.length > 1) {
@@ -79,6 +89,7 @@ app.post("/api/files", upload.array("file"), async (req, res) => {
           if (err) console.log(err);
         });
       });
+      const title = files[0].originalname;
 
       const fileData = {
         path: `uploads/${randomPath}`,
@@ -88,13 +99,41 @@ app.post("/api/files", upload.array("file"), async (req, res) => {
       if (req.body.password != null && req.body.password !== "") {
         fileData.password = await bcrypt.hash(req.body.password, 10);
       }
+      if (req.body.sendermail != null && req.body.recievermail != null) {
+        fileData.sender = req.body.sendermail;
+        fileData.receiver = req.body.recievermail;
+      }
       const file = await File.create(fileData);
-      res.render("index", {
+      id = file.id;
+      res.render("transfer", {
         fileLink: `${process.env.APP_BASE_URL}/file/${file.id}`,
       });
     }
+    let emailFrom = req.body.sendermail;
+    let emailTo = req.body.recievermail;
+    if (id && emailTo && emailFrom) {
+      const file = await File.findOne({ _id: id });
+      let passSentence = "";
+      const sendmail = require("./services/mail");
+      let dLink = process.env.APP_BASE_URL + "/file/" + file.id;
+      if (req.body.passCheck == "on" && req.body.password != null) {
+        passSentence = "File password : " + req.body.password;
+      }
+      sendmail({
+        from: emailFrom,
+        to: emailTo,
+        subject: "file sharing",
+        text: `${emailFrom} sent a mail`,
+        html: require("./services/template")({
+          emailFrom: emailFrom,
+          downloadLink: dLink,
+          size: parseInt(file.size / 1000) + "KB",
+          expires: "24 hours",
+          passSentence: passSentence,
+        }),
+      });
+    }
   } catch (error) {
-    // next();
     console.log(error);
   }
 });
